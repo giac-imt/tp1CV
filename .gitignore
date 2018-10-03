@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+tp1CVexo4/data/cifar-10-batches-py/batches.meta
+tp1CVexo4/data/cifar-10-batches-py/data_batch_1
+tp1CVexo4/data/cifar-10-batches-py/data_batch_2
+tp1CVexo4/data/cifar-10-batches-py/data_batch_3
+tp1CVexo4/data/cifar-10-batches-py/data_batch_4
+tp1CVexo4/data/cifar-10-batches-py/data_batch_5
+tp1CVexo4/data/cifar-10-batches-py/readme.html
+tp1CVexo4/data/cifar-10-batches-py/test_batch
