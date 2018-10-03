@@ -1,30 +1,66 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
+
+
+def centroid_histogram(clt):
+
+    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
+    (hist, _) = np.histogram(clt.labels_, bins=numLabels)
+    # normalize the histogram, such that it sums to one
+    hist = hist.astype("float")
+    hist /= hist.sum()
+    return hist
+
+
+def plot_colors(hist, centroids):
+    bar = np.zeros((50, 300, 3), dtype="uint8")
+    startX = 0
+    # loop over the percentage of each cluster and the color of
+    # each cluster
+    for (percent, color) in zip(hist, centroids):
+        # plot the relative percentage of each cluster
+        endX = startX + (percent * 300)
+        cv2.rectangle(bar, (int(startX), 0), (int(endX), 50),
+        color.astype("uint8").tolist(), -1)
+        startX = endX
+    return bar
+
 
 # import de l'image
-img = cv2.imread('code-route.jpg', 0)
+image = cv2.imread('code-route.jpg')
 
-# create a mask
-mask = np.zeros(img.shape[:2], np.uint8)
-mask[100:120, 100:120] = 255
-masked_img = cv2.bitwise_and(img, img, mask=mask)
+image = image.reshape((image.shape[0] * image.shape[1], 3))
+clt = KMeans(n_clusters=5)
+clt.fit(image)
 
-mask2 = np.zeros(img.shape[:2], np.uint8)
-mask2[120:200, 120:200] = 255
-masked_img2 = cv2.bitwise_and(img, img, mask=mask2)
+hist = centroid_histogram(clt)
+bar = plot_colors(hist, clt.cluster_centers_)
 
-# Calculate histogram with mask and without mask
-hist = cv2.calcHist([img], [0], None, [256], [0, 256])
-
-# Check third argument for mask
-hist_full = cv2.calcHist([img], [0], None, [256], [0, 256])
-hist_mask = cv2.calcHist([img], [0], mask, [256], [0, 256])
-hist_mask2 = cv2.calcHist([img], [0], mask2, [256], [0, 256])
-plt.subplot(221), plt.imshow(masked_img2, 'gray')
-plt.subplot(222), plt.imshow(masked_img, 'gray')
-plt.subplot(223), plt.plot(hist_full), plt.plot(hist_mask)
-plt.subplot(224), plt.plot(hist_full), plt.plot(hist_mask2)
-plt.xlim([0, 256])
+plt.figure()
+plt.axis("off")
+plt.imshow(bar)
 plt.show()
+
+# # KMeans façon OpenCV
+# img = cv2.imread('code-route.jpg')
+# Z = img.reshape((-1, 3))
+#
+# # convert to np.float32
+# Z = np.float32(Z)
+#
+# # define criteria, number of clusters(K) and apply kmeans()
+# criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+# K = 5
+# ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+#
+# # Now convert back into uint8, and make original image
+# center = np.uint8(center)
+# res = center[label.flatten()]
+# res2 = res.reshape(img.shape)
+#
+# cv2.imshow('res2', res2)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
